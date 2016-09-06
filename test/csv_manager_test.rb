@@ -1,4 +1,3 @@
-gem 'minitest'
 require './lib/csv_manager'
 require 'minitest/autorun'
 require 'minitest/pride'

@@ -13,10 +13,10 @@ module Cleaner
 
   #phone
   def self.clean_phone(data)
-    unless data.nil? || data == "0" || data == "" || !data.match(/[[:alpha:]]/).nil?
+    unless bad_number?(data)
       number_cleaner(data)
     else
-      "Missing or bad phone number."
+      "Bad number"
     end
   end
 
@@ -25,6 +25,10 @@ module Cleaner
     if data.gsub(/\D/, "").match(/^1?(\d{3})(\d{3})(\d{4})/)
       [$1, $2, $3].join("-")
     end
+  end
+
+  def self.bad_number?(data)
+    data.nil? || data == "0" || data == "" || !data.match(/[[:alpha:]]/).nil? || data.gsub("-", "").length < 10
   end
 
   def self.clean_state(data)

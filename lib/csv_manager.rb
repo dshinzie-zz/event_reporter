@@ -16,7 +16,6 @@ class CSVManager
     self.data = []
     CSV.foreach(filename, headers: true, header_converters: :symbol) do |row|
       self.data << Staging.new(row) #initialize each row
-      #binding.pry
     end
   end
 
