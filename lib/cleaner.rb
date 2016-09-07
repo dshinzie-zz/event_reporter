@@ -35,4 +35,11 @@ module Cleaner
     data.nil? || data == "" ? data = "none" : data.downcase
   end
 
+  #cities with commas
+  def self.clean_address(data)
+    clean_data = clean_case(data)
+
+    clean_data.include?(",") ? clean_data.split[0].sub(",","") : clean_data
+  end
+
 end

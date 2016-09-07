@@ -69,18 +69,22 @@ class CleanerTest < Minitest::Test
   end
 
   def test_cleaner_returns_message_for_empty_or_nil_numbers
-    expected = "Missing or bad phone number."
+    expected = "Bad number"
     assert_equal expected, Cleaner.clean_phone("")
     assert_equal expected, Cleaner.clean_phone("0")
     assert_equal expected, Cleaner.clean_phone(nil)
   end
 
   def test_cleaner_returns_message_for_numbers_containing_letters
-    expected = "Missing or bad phone number."
+    expected = "Bad number"
     assert_equal expected, Cleaner.clean_phone("n000")
     assert_equal expected, Cleaner.clean_phone("xxxx000")
     assert_equal expected, Cleaner.clean_phone("ajgabrie@unca.000")
     assert_equal expected, Cleaner.clean_phone("9.82E+00")
+  end
+
+  def test_cleaner_takes_data_if_has_comma
+    assert_equal "first", Cleaner.clean_address("first, second")
   end
 
 end

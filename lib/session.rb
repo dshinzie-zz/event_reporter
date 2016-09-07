@@ -2,7 +2,11 @@ require_relative 'csv_manager'
 require_relative 'help'
 require_relative 'queue'
 require_relative 'messages'
+require 'sunlight/congress'
+require 'erb'
 require 'pry'
+
+Sunlight::Congress.api_key = "e179a6973728c4dd3fb1204283aaccb5"
 
 class Session
 
@@ -25,31 +29,45 @@ class Session
     when "find"
       execute_find(params)
     when "queue"
-      execute_queue(params[0])
+      execute_queue(params)
     when "help"
-      "come back"
+      execute_help(params)
     end
   end
 
   def split_parameters(input)
-    if input.split.length == 1
-      [input.split[0].downcase, nil]
-    else
-      [input.split[0].downcase, input.split[1..-1]]
+    output = input.split
+    case
+    when output.length == 1
+      [output[0].downcase, nil]
+    when output[0] == "help"
+      [output[0], output[1..-1].join(" ")]
+    when output.length == 2
+      [output[0].downcase, [output[1].downcase]]
+    when output[0] == "queue" && output.length > 2
+      [output[0], [output[1..2].join(" "), output[3]]]
+    when output[0] == "find"
+      [output[0], [output[1], output[2..-1].join(" ")]]
     end
   end
 
   def validate_commands(command, params)
     valid_commands = ["load", "help", "queue", "find", "exit", "e", "quit", "q"]
-    valid_queue = ["count", "clear", "print", "print by", "save to"]
+    valid_queue = ["count", "clear", "print", "print by", "save to", "export html", "district"]
 
-    if !valid_commands.include?(command)
+    if invalid_command?(command, valid_commands)
       Messages.invalid_command
-    elsif command == "queue" && !valid_queue.include?(params[0])
+    elsif command == "queue" && params.class == Array && invalid_command?(params.first, valid_queue)
+      Messages.invalid_queue
+    elsif command == "queue" && params.class == String && invalid_command?(params, valid_queue)
       Messages.invalid_queue
     else
       return command, params
     end
+  end
+
+  def invalid_command?(input, list)
+    list.include?(input) ? false : true
   end
 
   def execute_find(params)
@@ -64,17 +82,17 @@ class Session
   end
 
   def execute_queue(params)
-    case params
+    case params[0]
     when "count"
       queue.queue.nil? ? Messages.queue_empty : Messages.queue_count(queue.queue_count)
     when "clear"
       queue.queue_clear
-    when "distict"
-      ""
+    when "district"
+      queue.queue_district
     when "print"
       queue.queue_print
     when "print by"
-      ""
+      queue.queue_print_by(params[1])
     when "save to"
       ""
     when "export html"
@@ -92,6 +110,14 @@ class Session
       Messages.file_loaded(filename)
     else
       Messages.file_missing
+    end
+  end
+
+  def execute_help(params)
+    if params.nil?
+      Messages.help_full
+    else
+      help.help_display(params)
     end
   end
 

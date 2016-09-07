@@ -11,6 +11,8 @@ class Staging
               :city,
               :state,
               :zipcode
+              
+  attr_accessor :district
 
   def initialize(data)
     @regdate = data[:regdate]
@@ -18,10 +20,11 @@ class Staging
     @last_name = Cleaner.clean_case(data[:last_name])
     @email_address = Cleaner.clean_case(data[:email_address])
     @homephone = Cleaner.clean_phone(data[:homephone])
-    @street = Cleaner.clean_case(data[:street])
-    @city = Cleaner.clean_case(data[:city])
+    @street = Cleaner.clean_address(data[:street])
+    @city = Cleaner.clean_address(data[:city])
     @state = Cleaner.clean_state(data[:state])
     @zipcode = Cleaner.clean_zipcode(data[:zipcode]).strip
+    @district = ""
   end
 
 end

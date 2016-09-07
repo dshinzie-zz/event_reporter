@@ -39,6 +39,9 @@ class SessionTest < Minitest::Test
     s.execute_find(["first_name", "John"])
 
     assert_equal 63, s.queue_count
+  end
+
+  def method_name
 
   end
 
