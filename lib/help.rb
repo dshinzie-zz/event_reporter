@@ -1,5 +1,4 @@
-require_relative 'Messages'
-require 'pry'
+require './lib/Messages'
 
 class Help
 
@@ -27,5 +26,4 @@ class Help
       Messages.help_queue_export_html
     end
   end
-
 end

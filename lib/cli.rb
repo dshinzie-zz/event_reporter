@@ -1,10 +1,8 @@
-require_relative 'messages'
-require_relative 'session'
-require 'pry'
-
+require './lib/messages'
+require './lib/session'
 
 class CLI
-  attr_reader :session, :command
+  attr_reader :session, :command, :input, :EXIT_COMMANDS
 
   EXIT_COMMANDS = ["q", "quit", "exit", "e"]
 
@@ -27,6 +25,3 @@ class CLI
     Messages.display_exit
   end
 end
-
-c = CLI.new
-c.execute

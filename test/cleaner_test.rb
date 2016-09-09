@@ -55,12 +55,6 @@ class CleanerTest < Minitest::Test
     assert_equal "360-904-6000", Cleaner.clean_phone("(360)-904.6000")
   end
 
-  def test_cleaner_takes_first_ten_digits_excluding_1
-    assert_equal "999-999-9999", Cleaner.clean_phone("999999999999999")
-    assert_equal "111-111-1111", Cleaner.clean_phone("1111111111111111111111")
-    assert_equal "234-567-8901", Cleaner.clean_phone("2345678901234567890")
-  end
-
   def test_cleaner_excludes_first_optional_1
     assert_equal "508-237-5000", Cleaner.clean_phone("1-508-237-5000")
     assert_equal "857-498-1000", Cleaner.clean_phone("1(857)498-1000")
@@ -69,22 +63,29 @@ class CleanerTest < Minitest::Test
   end
 
   def test_cleaner_returns_message_for_empty_or_nil_numbers
-    expected = "Bad number"
+    expected = "000-000-0000"
     assert_equal expected, Cleaner.clean_phone("")
     assert_equal expected, Cleaner.clean_phone("0")
     assert_equal expected, Cleaner.clean_phone(nil)
   end
 
   def test_cleaner_returns_message_for_numbers_containing_letters
-    expected = "Bad number"
+    expected = "000-000-0000"
     assert_equal expected, Cleaner.clean_phone("n000")
     assert_equal expected, Cleaner.clean_phone("xxxx000")
     assert_equal expected, Cleaner.clean_phone("ajgabrie@unca.000")
     assert_equal expected, Cleaner.clean_phone("9.82E+00")
   end
 
-  def test_cleaner_takes_data_if_has_comma
-    assert_equal "first", Cleaner.clean_address("first, second")
+  def test_cleaner_returns_message_for_number_less_than_10_digits
+    expected = "000-000-0000"
+    assert_equal expected, Cleaner.clean_phone("999 23 9343")
+    assert_equal expected, Cleaner.clean_phone("324 300 333")
+    assert_equal expected, Cleaner.clean_phone("114 454 121")
+    assert_equal "993-343-1234", Cleaner.clean_phone("993 343 1234")
+
   end
+
+
 
 end

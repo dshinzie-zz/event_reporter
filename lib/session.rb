@@ -1,26 +1,22 @@
-require_relative 'csv_manager'
-require_relative 'help'
-require_relative 'queue'
-require_relative 'messages'
-require 'sunlight/congress'
-require 'erb'
-require 'pry'
-
-Sunlight::Congress.api_key = "e179a6973728c4dd3fb1204283aaccb5"
+require './lib/csv_manager'
+require './lib/help'
+require './lib/queue_manager'
+require './lib/messages'
 
 class Session
 
-  attr_reader :manager, :queue, :help
+  attr_reader :manager, :qm, :help, :export, :com, :para
 
   def initialize
     @manager = CSVManager.new
-    @queue = Queue.new
+    @qm = QueueManager.new
     @help = Help.new
   end
 
   def execute_command(command)
 
     command, params = split_parameters(command)
+    @com, @para = command, params
     validate_commands(command, params)
 
     case command
@@ -41,13 +37,13 @@ class Session
     when output.length == 1
       [output[0].downcase, nil]
     when output[0] == "help"
-      [output[0], output[1..-1].join(" ")]
+      [output[0].downcase, output[1..-1].join(" ")]
     when output.length == 2
       [output[0].downcase, [output[1].downcase]]
     when output[0] == "queue" && output.length > 2
-      [output[0], [output[1..2].join(" "), output[3]]]
+      [output[0].downcase, [output[1..2].join(" "), output[3]]]
     when output[0] == "find"
-      [output[0], [output[1], output[2..-1].join(" ")]]
+      [output[0].downcase, [output[1], output[2..-1].join(" ")]]
     end
   end
 
@@ -70,47 +66,57 @@ class Session
     list.include?(input) ? false : true
   end
 
+  def execute_queue(params)
+    case params[0]
+    when "count"
+      qm.queue.empty? ? Messages.queue_empty : Messages.queue_count(qm.queue_count)
+    when "clear"
+      qm.queue_clear
+    when "district"
+      qm.queue_district(qm.queue)
+    when "print", "print by"
+      qm.queue.empty? ? Messages.queue_empty : qm.queue_print(params[1])
+    when "save to"
+      manager.save_file(params[1], qm.queue)
+    when "export html"
+      qm.queue_export(params[1], qm.queue)
+    end
+  end
+
   def execute_find(params)
     attributes = params[0]
     criteria = params[1..-1].join.downcase
-    find(manager.data, attributes, criteria)
+
+    if qm.attribute_exists?(manager.data, attributes)
+      find(manager.data, attributes, criteria)
+    else
+      Messages.find_wrong_attribute(attributes)
+    end
   end
 
   def find(data, attribute, criteria)
     results = data.select { |data| data.send(attribute) == criteria }
-    queue.queue_add(results)
+    qm.queue_add(results)
   end
 
-  def execute_queue(params)
-    case params[0]
-    when "count"
-      queue.queue.nil? ? Messages.queue_empty : Messages.queue_count(queue.queue_count)
-    when "clear"
-      queue.queue_clear
-    when "district"
-      queue.queue_district
-    when "print"
-      queue.queue_print
-    when "print by"
-      queue.queue_print_by(params[1])
-    when "save to"
-      ""
-    when "export html"
-      ""
-    end
-  end
-
-  def execute_load(filename)
-    if filename.nil?
-      filename = "./event_attendees.csv"
-    end
+  def execute_load(input_filename)
+    filename = get_filename(input_filename)
 
     if File.exists?(filename)
       @manager.load_file(filename)
       Messages.file_loaded(filename)
     else
-      Messages.file_missing
+      Messages.file_missing(filename)
     end
+  end
+
+  def get_filename(filename)
+    if filename.nil?
+      filename = "./event_attendees.csv"
+    else
+      filename = "./" + filename.join
+    end
+    filename
   end
 
   def execute_help(params)
