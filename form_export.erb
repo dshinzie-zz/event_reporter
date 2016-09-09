@@ -1,0 +1,26 @@
+<html>
+<head>
+  <link rel="stylesheet"; type="text/css"; href="stylesheet.css">
+  <meta charset='utf-8'>
+  <title>Event Reporter Export</title>
+</head>
+<body>
+  <h1>Event Report</h1>
+
+  <table>
+    <tr><th>Full Name</th><th>Email</th><th>Street</th><th>Location</th><th>Homephone</th><th>District</th></tr>
+
+      <% data.each do |attendee| %>
+
+        <tr>
+          <td><%= "#{attendee.first_name.upcase} #{attendee.last_name.upcase}" %></td>
+          <td><%= "#{attendee.email_address.upcase}" %></td>
+          <td><%= "#{attendee.street.upcase}" %></td>
+          <td><%= "#{attendee.state.upcase}, #{attendee.city.upcase}, #{attendee.zipcode}" %></td>
+          <td><%= "#{attendee.homephone}" %></td>
+          <td><%= "#{attendee.district}" %></td>
+        </tr>
+        <% end %>
+  </table>
+</body>
+</html>
